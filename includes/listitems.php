@@ -1,5 +1,4 @@
 <div id="item_<?php echo$r['id'];?>" class="media bg-primary col-xs-12 col-sm-5 m-1">
-<?php if(!file_exists($r['image']))$r['image']='images/placeholder.jpg';?>
   <img class="align-self-start<?php echo$imageSize;?> mr-2" src="<?php echo$r['image'];?>">
   <div class="media-body text-small">
     <h6 class="text-white mt-1 mb-0">

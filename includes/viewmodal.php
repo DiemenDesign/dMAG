@@ -11,7 +11,6 @@ $r=$q->fetch(PDO::FETCH_ASSOC);
 </div>
 <div class="modal-body>">
   <div id="item_<?php echo$r['id'];?>" class="media m-1">
-  <?php if(!file_exists('../'.$r['image']))$r['image']='../images/placeholder.jpg';?>
     <img class="align-self-start mr-2" style="max-width:256px;max-height:256px;" src="<?php echo$r['image'];?>">
     <div class="media-body text-small">
       <small>
