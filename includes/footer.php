@@ -14,7 +14,7 @@
       $('.viewModal').on('click',function(e){
         e.preventDefault();
         var dataURL = $(this).attr('data-remote');
-        $('.modal-content').load(dataURL,function(){
+        $('#viewContent').load(dataURL,function(){
             $('#viewModal').modal({show:true});
         });
       });
@@ -36,7 +36,7 @@
     </script>
     <div id="viewModal" class="modal" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
+        <div id="viewContent" class="modal-content">
         </div>
       </div>
     </div>
