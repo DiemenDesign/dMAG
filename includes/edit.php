@@ -2,11 +2,12 @@
 $act = isset($_POST['act']) ? $_POST['act'] : $_GET['act'];
 $id = isset($_GET['id']) ? $_GET['id'] : 0;
 $error = [
-    'count' => 0,
-    'title' => '',
-    'image' => '',
-    'issue' => '',
-    'tags'  => ''
+    'count'     => 0,
+    'title'     => '',
+    'image'     => '',
+    'issue'     => '',
+    'tags'      => '',
+    'youtubAPI' => ''
   ];
 if($act == 'add' || $act == 'edit'){
   $r = [
@@ -32,6 +33,10 @@ if($act == 'add' || $act == 'edit'){
   if($r['tags'] == '' && $r['url'] == ''){
     $error['count']++;
     $error['tags'] = '<div class="invalid-feedback">No <strong>Tags</strong> were added.</div>';
+  }
+  if($settings['youtubeAPI'] == ''){
+    $error['counte']++;
+    $error['youtubeAPI'] = '<div class="alert alert-danger">The is no API Key set to retreive YouTube Video data.</div>';
   }
 }
 if($act == 'add'){
@@ -126,10 +131,15 @@ if($id == 0){
 }?>
 <div class="container mt-3">
   <div id="item_<?php echo$r['id'];?>" class="media bg-primary">
-<?php if(!file_exists($r['image']))$r['image']='images/placeholder.jpg';?>
+<?php if(!file_exists($r['image'])){
+  $r['image']='images/placeholder.jpg';
+}elseif($r['image']==''){
+  $r['image']='images/placeholder.jpg';
+}?>
     <img class="align-self-start s256 mr-2" src="<?php echo$r['image'];?>">
     <div class="media-body mt-2 ml-2 mr-4">
-      <?php if($error['count'] > 0){?><div class="alert alert-danger">There were <strong><?php echo$error['count'];?></strong> errors found.</div><?php }?>
+<?php if($error['count'] > 0){?><div class="alert alert-danger">There were <strong><?php echo$error['count'];?></strong> errors found.</div><?php }
+if($error['youtubeAPI']!='')echo$error['youtubeAPI'];?>
       <form action="index.php?page=edit&id=<?php echo$r['id'];?>" method="post" enctype="multipart/form-data">
         <input type="hidden" name="act" value="<?php if($id==0){echo'add';}else{echo'edit';}?>">
 

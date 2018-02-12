@@ -12,6 +12,7 @@ $removeItem=true;
 $cat=isset($_GET['cat'])?$_GET['cat']:'';
 $tag=isset($_GET['tag'])?$_GET['tag']:'';
 $sea=isset($_POST['search'])?$_POST['search']:'';
+$query='%';
 $qry="SELECT * FROM magazines";
 if($cat!=''){
   $qry.=" WHERE LOWER(category) LIKE LOWER(:query)";
