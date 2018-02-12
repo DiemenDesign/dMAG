@@ -12,6 +12,7 @@ if($act == 'add' || $act == 'edit'){
   $r = [
     'id'        => $id,
     'title'     => $_POST['title'],
+    'url'       => $_POST['url'],
     'image'     => 'images/placeholder.jpg',
     'issue'     => $_POST['issue'],
     'publisher' => $_POST['pub'],
@@ -20,28 +21,45 @@ if($act == 'add' || $act == 'edit'){
     'comments'  => $_POST['comments'],
     'ti'        => strtotime($_POST['ti'])
   ];
-  if($r['title'] == ''){
+  if($r['title'] == '' && $r['url'] == ''){
     $error['count']++;
     $error['title'] = '<div class="invalid-feedback">A <strong>Title</strong> wasn\'t entered.</div>';
   }
-  if($r['issue'] == ''){
+  if($r['issue'] == '' && $r['url'] == ''){
     $error['count']++;
     $error['issue'] = '<div class="invalid-feedback">An <strong>Issue Number</strong> wasn\'t entered.</div>';
   }
-  if($r['tags'] == ''){
+  if($r['tags'] == '' && $r['url'] == ''){
     $error['count']++;
     $error['tags'] = '<div class="invalid-feedback">No <strong>Tags</strong> were added.</div>';
   }
 }
 if($act == 'add'){
   if($error['count'] == 0){
-    if(isset($_FILES['image'])){
-      $r['image'] = 'media/' . $_FILES['image']['name'];
-      move_uploaded_file($_FILES["image"]["tmp_name"],$r['image']);
+    if($r['url']!=''){
+      $video_id = explode("?v=", $r['url']);
+      $video = file_get_contents("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=".$video_id[1]."&key=".$settings['youtubeAPI']);
+      $video = json_decode($video, true);
+      $r['title'] = $video['items'][0]['snippet']['title'];
+      $r['image'] = $video['items'][0]['snippet']['thumbnails']['maxres']['url'];
+      $r['ti'] = strtotime($video['items'][0]['snippet']['publishedAt']);
+      $r['publisher'] = $video['items'][0]['snippet']['channelTitle'];
+      $r['category'] = 'youtube';
+      $r['comments'] = $video['items'][0]['snippet']['description'];
+      $tags = $video['items'][0]['snippet']['tags'];
+      foreach($tags as $tag){
+        $r['tags'].=$tag.',';
+      }
+    }else{
+      if(isset($_FILES['image'])){
+        $r['image'] = 'media/' . $_FILES['image']['name'];
+        move_uploaded_file($_FILES["image"]["tmp_name"],$r['image']);
+      }
     }
-    $q = $db -> prepare("INSERT INTO magazines (title,image,issue,publisher,category,tags,comments,ti) VALUES (:title,:image,:issue,:publisher,:category,:tags,:comments,:ti)");
+    $q = $db -> prepare("INSERT INTO magazines (title,url,image,issue,publisher,category,tags,comments,ti) VALUES (:title,:url,:image,:issue,:publisher,:category,:tags,:comments,:ti)");
     $q -> execute(array(
       ':title'      =>  $r['title'],
+      ':url'        =>  $r['url'],
       ':image'      =>  $r['image'],
       ':issue'      =>  $r['issue'],
       ':publisher'  =>  $r['publisher'],
@@ -58,20 +76,26 @@ if($act == 'add'){
 }
 if($act == 'edit'){
   if($error['count'] == 0){
-    if(isset($_FILES['image'])){
-      $r['image'] = 'media/' . $_FILES['image']['name'];
-      if(!file_exists('media/'.$_FILES['image']['name'])){
-        move_uploaded_file($_FILES["image"]["tmp_name"],$r['image']);
+    if($r['url']!=''){
+      $video_id = explode("?v=", $r['url']);
+      $r['image']="http://img.youtube.com/vi/".$video_id[1]."/maxresdefault.jpg";
+    }else{
+      if(isset($_FILES['image'])){
+        $r['image'] = 'media/' . $_FILES['image']['name'];
+        if(!file_exists('media/'.$_FILES['image']['name'])){
+          move_uploaded_file($_FILES["image"]["tmp_name"],$r['image']);
+        }
       }
-      $q = $db -> prepare("UPDATE magazines SET image=:image WHERE id=:id");
-      $q -> execute(array(
-        ':image'  =>  $r['image'],
-        ':id'     =>  $id
-      ));
     }
-    $q = $db -> prepare("UPDATE magazines SET title=:title,issue=:issue,publisher=:publisher,category=:category,tags=:tags,comments=:comments,ti=:ti WHERE id=:id");
+    $q = $db -> prepare("UPDATE magazines SET image=:image WHERE id=:id");
+    $q -> execute(array(
+      ':image'  =>  $r['image'],
+      ':id'     =>  $id
+    ));
+    $q = $db -> prepare("UPDATE magazines SET title=:title,url=:url,issue=:issue,publisher=:publisher,category=:category,tags=:tags,comments=:comments,ti=:ti WHERE id=:id");
     $q->execute(array(
       ':title'      =>  $r['title'],
+      ':url'        =>  $r['url'],
       ':issue'      =>  $r['issue'],
       ':publisher'  =>  $r['publisher'],
       ':category'   =>  $r['category'],
@@ -87,6 +111,7 @@ if($id == 0){
     'id'        =>  0,
     'title'     =>  isset($_POST['title'])?$_POST['title']:'',
     'image'     =>  'images/placeholder.jpg',
+    'url'       =>  isset($_POST['url'])?$_POST['url']:'',
     'issue'     =>  isset($_POST['issue'])?$_POST['issue']:'',
     'publisher' =>  isset($_POST['publisher'])?$_POST['publisher']:'',
     'category'  =>  isset($_POST['category'])?$_POST['category']:'',
@@ -119,6 +144,11 @@ while($row = $sql -> fetch(PDO::FETCH_ASSOC)){
 }?>
           </datalist>
           <?php if($error['title']!='')echo$error['title'];?>
+        </div>
+
+        <div class="form-group">
+            <label for="url">URL</label>
+            <input type="text" class="form-control" id="url" name="url" value="<?php echo$r['url'];?>" placeholder="Enter URL...">
         </div>
 
         <div class="form-group">
@@ -182,3 +212,4 @@ while($row = $sql -> fetch(PDO::FETCH_ASSOC)){
     </div>
   </div>
 </div>
+

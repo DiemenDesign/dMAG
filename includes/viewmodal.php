@@ -11,7 +11,11 @@ $r=$q->fetch(PDO::FETCH_ASSOC);
 </div>
 <div class="modal-body>">
   <div id="item_<?php echo$r['id'];?>" class="media m-1">
-    <img class="align-self-start mr-2" style="max-width:256px;max-height:256px;" src="<?php echo$r['image'];?>">
+    <?php if($r['url']!=''){
+      echo'<a target="_blank" href="'.$r['url'].'"><img class="align-self-start'.$imageSize.' mr-2" style="max-width:256px;max-height:256px;" src="'.$r['image'].'"></a>';
+    }else{
+      echo'<img class="align-self-start'.$imageSize.' mr-2" style="max-width:256px;max-height:256px;" src="'.$r['image'].'">';
+    }?>    
     <div class="media-body text-small">
       <small>
         <div>

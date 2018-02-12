@@ -1,4 +1,7 @@
 <?php
+$settings = [
+  'youtubeAPI'  => '' // Your API Key
+];
 $database = [
   'driver'   => 'mysql',
   'host'     => 'localhost',

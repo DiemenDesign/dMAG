@@ -1,5 +1,9 @@
 <div id="item_<?php echo$r['id'];?>" class="media bg-primary col-xs-12 col-sm-5 m-1">
-  <img class="align-self-start<?php echo$imageSize;?> mr-2" src="<?php echo$r['image'];?>">
+<?php if($r['url']!=''){
+  echo'<a target="_blank" href="'.$r['url'].'"><img class="align-self-start'.$imageSize.' mr-2" src="'.$r['image'].'"></img>';
+}else{
+  echo'<img class="align-self-start'.$imageSize.' mr-2" src="'.$r['image'].'">';
+}?>
   <div class="media-body text-small">
     <h6 class="text-white mt-1 mb-0">
       <a class="d-block d-sm-none" href="?page=view&id=<?php echo$r['id'];?>"><?php echo$r['title'].' - Issue '.$r['issue'];?></a>
