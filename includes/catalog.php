@@ -12,6 +12,7 @@ $removeItem=true;
 $cat=isset($_GET['cat'])?$_GET['cat']:'';
 $tag=isset($_GET['tag'])?$_GET['tag']:'';
 $sea=isset($_POST['search'])?$_POST['search']:'';
+$seatype=isset($_POST['seatype'])?$_POST['seatype']:'';
 $query='%';
 $qry="SELECT * FROM magazines";
 if($cat!=''){
@@ -23,11 +24,13 @@ if($tag!=''){
   $query=$tag;
 }
 if($sea!=''){
-  $qry.=" WHERE LOWER(title) LIKE LOWER(:query) OR LOWER(category) LIKE LOWER(:query) OR LOWER(tags) LIKE LOWER(:query) OR LOWER(commments) LIKE LOWER(:query)";
-  $query=$sea;
+  if($seatype==''||$seatype=='comments')$qry.=" WHERE LOWER(comments) LIKE LOWER(:query)";
+  if($seatype=='tags')$qry.=" WHERE LOWER(tags) LIKE LOWER(:query)";
+  if($seatype=='title')$qry.=" WHERE LOWER(title) LIKE LOWER(:query)";
+  $query=str_replace(' ','%',$sea);
 }
-$qry.=" ORDER BY ti DESC";
-if($query=='')$qry.=" LIMIT 1,8";
+if($query=='%')$qry.=" ORDER BY rand()";else $qry.=" ORDER BY ti DESC";
+if($query=='%')$qry.=" LIMIT 1,8";
 $q=$db->prepare($qry);
 $q->execute(array(':query'=>'%'.$query.'%'));
 while($r = $q -> fetch(PDO::FETCH_ASSOC)){

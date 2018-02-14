@@ -14,10 +14,25 @@
       <li class="nav-item<?php if($page=='about')echo' active';?>">
         <a class="nav-link" href="#" data-toggle="modal" data-target="#about">About</a>
       </li>
+      <li class="nav-item">
+        <span class="navbar-text ml-3 mt-2">
+<?php $mags=$db->query("SELECT COUNT(DISTINCT id) AS cnt FROM magazines WHERE url='' AND issue!=''")->fetch(PDO::FETCH_ASSOC);if($mags['cnt']>0)echo$mags['cnt'].' Magazines.';?>
+        </span>
+        <span class="navbar-text ml-3 mt-2">
+<?php $vids=$db->query("SELECT COUNT(DISTINCT id) AS cnt FROM magazines WHERE url!=''")->fetch(PDO::FETCH_ASSOC);if($vids['cnt']>0)echo$vids['cnt'].' Videos.';?>
+        </span>
+      </li>
     </ul>
     <form class="form-inline" method="post" action="?page=catalog">
       <div class="input-group">
         <input class="form-control form-control-sm" type="text" name="search" value="<?php if(isset($_POST['search']))echo$_POST['search'];?>" placeholder="Search...">
+        <div class="input-group-append">
+          <select class="form-control form-control-sm" name="seatype">
+            <option value="comments"<?php if(isset($_POST['seatype'])&&$_POST['seatype']=='comments')echo' selected';?>>Content</option>
+            <option value="tags"<?php if(isset($_POST['seatype'])&&$_POST['seatype']=='tags')echo' selected';?>>Tags</option>
+            <option value="title"<?php if(isset($_POST['seatype'])&&$_POST['seatype']=='title')echo' selected';?>>Title</option>
+          </select>
+        </div>
         <div class="input-group-append">
           <button class="btn btn-secondary btn-sm" type="submit">Search</button>
         </div>

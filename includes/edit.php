@@ -57,8 +57,15 @@ if($act == 'add'){
       }
     }else{
       if(isset($_FILES['image'])){
+        $check = getimagesize($_FILES["image"]["tmp_name"]);
         $r['image'] = 'media/' . $_FILES['image']['name'];
-        move_uploaded_file($_FILES["image"]["tmp_name"],$r['image']);
+        if($check !== false) {
+          $imageFileType = strtolower(pathinfo($r['image'],PATHINFO_EXTENSION));
+          if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+          && $imageFileType != "gif" ){}else{
+            move_uploaded_file($_FILES["image"]["tmp_name"],$r['image']);
+          }
+        }
       }
     }
     $q = $db -> prepare("INSERT INTO magazines (title,url,image,issue,publisher,category,tags,comments,ti) VALUES (:title,:url,:image,:issue,:publisher,:category,:tags,:comments,:ti)");
@@ -84,19 +91,29 @@ if($act == 'edit'){
     if($r['url']!=''){
       $video_id = explode("?v=", $r['url']);
       $r['image']="http://img.youtube.com/vi/".$video_id[1]."/maxresdefault.jpg";
+      $q = $db -> prepare("UPDATE magazines SET image=:image WHERE id=:id");
+      $q -> execute(array(
+        ':image'  =>  $r['image'],
+        ':id'     =>  $id
+      ));
     }else{
-      if(isset($_FILES['image'])){
+      if(isset($_FILES['image'])&&$_FILES['image']!=''){
         $r['image'] = 'media/' . $_FILES['image']['name'];
-        if(!file_exists('media/'.$_FILES['image']['name'])){
-          move_uploaded_file($_FILES["image"]["tmp_name"],$r['image']);
+        $check = getimagesize($_FILES['image']["tmp_name"]);
+        if($check !== false) {
+          $imageFileType = strtolower(pathinfo($r['image'],PATHINFO_EXTENSION));
+          if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+          && $imageFileType != "gif" ){}else{
+            move_uploaded_file($_FILES["image"]["tmp_name"],$r['image']);
+            $q = $db -> prepare("UPDATE magazines SET image=:image WHERE id=:id");
+            $q -> execute(array(
+              ':image'  =>  $r['image'],
+              ':id'     =>  $id
+            ));
+          }
         }
       }
     }
-    $q = $db -> prepare("UPDATE magazines SET image=:image WHERE id=:id");
-    $q -> execute(array(
-      ':image'  =>  $r['image'],
-      ':id'     =>  $id
-    ));
     $q = $db -> prepare("UPDATE magazines SET title=:title,url=:url,issue=:issue,publisher=:publisher,category=:category,tags=:tags,comments=:comments,ti=:ti WHERE id=:id");
     $q->execute(array(
       ':title'      =>  $r['title'],
